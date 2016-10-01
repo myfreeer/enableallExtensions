@@ -15,7 +15,27 @@ for %%i in (
 "%_p%\User Data\Default\ChromeDWriteFontCache"
 "%_p%\User Data\Default\Current Session"
 "%_p%\User Data\Default\Current Tabs"
+"%_p%\User Data\Default\Service Worker\ScriptCache"
+"%_p%\User Data\Default\Service Worker\CacheStorage"
 ) do (
 attrib -r -s -h %%i /D /S
 del %%i /f /s /q
 )
+
+del /f /s /q "%_p%User Data\Default\Local Storage\*wikipedia.org*"
+del /f /s /q "%_p%User Data\Default\Local Storage\*weibo.com*"
+del /f /s /q "%_p%User Data\Default\Local Storage\*twitter.com*"
+del /f /s /q "%_p%User Data\Default\Local Storage\*suning.com*"
+del /f /s /q "%_p%User Data\Default\Local Storage\*taobao.com*"
+del /f /s /q "%_p%User Data\Default\Local Storage\*wikisource.org*"
+del /f /s /q "%_p%User Data\Default\Local Storage\*tmall.com_*"
+del /f /s /q "%_p%User Data\Default\Local Storage\*itproportal.com_*"
+del /f /s /q "%_p%User Data\Default\Local Storage\*alipay.com_*"
+del /f /s /q "%_p%User Data\Default\Local Storage\*medium.com_*"
+del /f /s /q "%_p%User Data\Default\Local Storage\*.jaeapp.com_*"
+del /f /s /q "%_p%User Data\Default\Local Storage\*blog.tox.im_*"
+del /f /s /q "%_p%User Data\Default\Local Storage\*neihanshequ.com_*"
+del /f /s /q "%_p%User Data\Default\IndexedDB\https_pan.baidu.com_0.indexeddb.leveldb\*.bak"
+del /f /s /q "%_p%User Data\Default\IndexedDB\https_pan.baidu.com_0.indexeddb.leveldb\*.log"
+
+pause
