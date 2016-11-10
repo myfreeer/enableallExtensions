@@ -1,7 +1,7 @@
 @echo off
 set "_p=%~dp0"
 pushd "%~dp0"
-REM Åú´¦ÀíÖĞ%~dp0ÎªÅú´¦ÀíÎÄ¼şËùÔÚÂ·¾¶
+REM æ‰¹å¤„ç†ä¸­%~dp0ä¸ºæ‰¹å¤„ç†æ–‡ä»¶æ‰€åœ¨è·¯å¾„
 if not exist "%_p%\User Data" exit
 for %%i in (
 "%_p%\User Data\Default\Cache"
@@ -35,7 +35,7 @@ del /f /s /q "%_p%User Data\Default\Local Storage\*medium.com_*"
 del /f /s /q "%_p%User Data\Default\Local Storage\*.jaeapp.com_*"
 del /f /s /q "%_p%User Data\Default\Local Storage\*blog.tox.im_*"
 del /f /s /q "%_p%User Data\Default\Local Storage\*neihanshequ.com_*"
-del /f /s /q "%_p%User Data\Default\IndexedDB\https_pan.baidu.com_0.indexeddb.leveldb\*.bak"
-del /f /s /q "%_p%User Data\Default\IndexedDB\https_pan.baidu.com_0.indexeddb.leveldb\*.log"
-
+del /f /s /q "%_p%User Data\Default\IndexedDB\*.bak"
+del /f /s /q "%_p%User Data\Default\IndexedDB\*.log"
+if exist debug.log del /f /q debug.log
 pause
