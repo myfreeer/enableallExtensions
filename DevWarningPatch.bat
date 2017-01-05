@@ -9,7 +9,7 @@ exit /b
 param([string]$cwd='.', [string]$dll)
 
 function main {
-    "Chrome 'developer mode extensions' warning disabler v1.0.7.20160919`n"
+    "Chrome 'developer mode extensions' warning disabler v1.0.9.20161227`n"
     $pathsDone = @{}
     if ($dll -and (gi -literal $dll)) {
         doPatch "DRAG'n'DROPPED" ((gi -literal $dll).directoryName + '\')
@@ -58,7 +58,7 @@ function doPatch([string]$pathLabel, [string]$path) {
     }
     $stroffs += $codesize
     if ($bytes[$stroffs] -eq 0) {
-        write-host -f green "`tALREADY PATCHED"
+        write-host -f darkgreen "`tALREADY PATCHED"
         return
     }
 
@@ -104,7 +104,7 @@ function doPatch([string]$pathLabel, [string]$path) {
 
     # patch the channel restriction code for stable/beta
     $code = $BC::ToString($bytes,0,$codesize)
-    $codepattern = "83-F8-03-7D-.{1,100}"
+    $codepattern = "83-F8-03-7D-.{1,100}" # cmp eax,3; jge ...
     $chanpos = 0
     try {
         if ($is64) {
@@ -127,16 +127,20 @@ function doPatch([string]$pathLabel, [string]$path) {
         } else {
             $flagOffs = [uint32]$stroffs + [uint32]$imagebase32
             $flagOffsStr = $BC::ToString($BC::GetBytes($flagOffs))
-            $variants = "($codepattern)-68-`$1-.{6}`$2",
-                        '68-$1-.{6}$2.{300,500}E8.{12,32}(83-F8-03-7D)',
-                        'E8.{12,32}(83-F8-03-7D).{300,500}68-$1-.{6}$2'
+            $variants = "(?<channel>$codepattern)-68-(?<flag>`$1-.{6}`$2)",
+                    '68-(?<flag>$1-.{6}$2).{300,500}E8.{12,32}(?<channel>83-F8-03-7D)',
+                    'E8.{12,32}(?<channel>83-F8-03-7D).{300,500}68-(?<flag>$1-.{6}$2)'
             forEach ($variant in $variants) {
                 $pattern = $flagOffsStr -replace '^(..)-.{6}(..)', $variant
-                "`tLooking for $pattern..."
-                $m = [regex]::matches($code, $pattern)
-                if ($m -and $m.count -eq 1) {
-                    $chanpos = $m[0].groups[1].index/3 + 2
-                    break
+                "`tLooking for $($pattern -replace '\?<.+?>', '')..."
+                $minDiff = 65536
+                foreach ($m in [regex]::matches($code, $pattern)) {
+                    $maybeFlagOffs = $BC::toUInt32($bytes, $m.groups['flag'].index/3)
+                    $diff = [Math]::abs($maybeFlagOffs - $flagOffs)
+                    if ($diff % 256 -eq 0 -and $diff -lt $minDiff) {
+                        $minDiff = $diff
+                        $chanpos = $m.groups['channel'].index/3 + 2
+                    }
                 }
             }
             if (!$chanpos) { throw }
@@ -159,7 +163,8 @@ function doPatch([string]$pathLabel, [string]$path) {
     move -literal "$dll.new" $dll -force
 
     $pathsDone[$path.toLower()] = $true
-    "DONE.`n"
+    write-host -f green "`tDONE.`n"
+    [GC]::Collect()
 }
 
 main
