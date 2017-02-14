@@ -9,7 +9,7 @@ exit /b
 param([string]$cwd='.', [string]$dll)
 
 function main {
-    "Chrome 'developer mode extensions' warning disabler v1.0.9.20161227`n"
+    "Chrome 'developer mode extensions' warning disabler v1.0.10.20170114`n"
     $pathsDone = @{}
     if ($dll -and (gi -literal $dll)) {
         doPatch "DRAG'n'DROPPED" ((gi -literal $dll).directoryName + '\')
@@ -104,12 +104,14 @@ function doPatch([string]$pathLabel, [string]$path) {
 
     # patch the channel restriction code for stable/beta
     $code = $BC::ToString($bytes,0,$codesize)
-    $codepattern = "83-F8-03-7D-.{1,100}" # cmp eax,3; jge ...
+    $rxChannel = '83-F8-(?:03-7D|02-7F)'
+    # old code: cmp eax,3; jge ...
+    # new code: cmp eax,2; jg ...
     $chanpos = 0
     try {
         if ($is64) {
             $pos = 0
-            $rx = [regex] "$codepattern-48-8D"
+            $rx = [regex]"$rxChannel-.{1,100}-48-8D"
             do {
                 $m = $rx.match($code,$pos)
                 if (!$m.success) { break }
@@ -119,17 +121,17 @@ function doPatch([string]$pathLabel, [string]$path) {
                 $diff = $pos/3+5+$offs - $stroffs
             } until ($diff -ge 0 -and $diff -le 4096 -and $diff % 256 -eq 0)
             if (!$m.success) {
-                $rx = [regex]'84-C0.{18,48}83-F8-(03)-7D-.{30,60}84-C0'
+                $rx = [regex]"84-C0.{18,48}($rxChannel)-.{30,60}84-C0"
                 $m = $rx.matches($code)
                 if ($m.count -ne 1) { throw }
-                $chanpos = $m[0].groups[1].index/3
+                $chanpos = $m[0].groups[1].index/3 + 2
             }
         } else {
             $flagOffs = [uint32]$stroffs + [uint32]$imagebase32
             $flagOffsStr = $BC::ToString($BC::GetBytes($flagOffs))
-            $variants = "(?<channel>$codepattern)-68-(?<flag>`$1-.{6}`$2)",
-                    '68-(?<flag>$1-.{6}$2).{300,500}E8.{12,32}(?<channel>83-F8-03-7D)',
-                    'E8.{12,32}(?<channel>83-F8-03-7D).{300,500}68-(?<flag>$1-.{6}$2)'
+            $variants = "(?<channel>$rxChannel-.{1,100})-68-(?<flag>`$1-.{6}`$2)",
+                    "68-(?<flag>`$1-.{6}`$2).{300,500}E8.{12,32}(?<channel>$rxChannel)",
+                    "E8.{12,32}(?<channel>$rxChannel).{300,500}68-(?<flag>`$1-.{6}`$2)"
             forEach ($variant in $variants) {
                 $pattern = $flagOffsStr -replace '^(..)-.{6}(..)', $variant
                 "`tLooking for $($pattern -replace '\?<.+?>', '')..."
