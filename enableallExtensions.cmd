@@ -46,6 +46,6 @@ exit /B
 
 :adduserdata
 if [%1]==[] exit /B -1
-if nor exist "%~1" exit /B -1
-FOR /F "usebackq" %%i IN (`dir /AD /B "%~1"`) DO @if exist "%~1\%%~i\Extensions" FOR /F "usebackq" %j IN (`dir /AD /B "%~1\%%~i\Extensions"`) do call :addrule %%i
+if not exist "%~1" exit /B -1
+FOR /F "usebackq" %%i IN (`dir /AD /B "%~1"`) DO if exist "%%~1\%%~i\Extensions" FOR /F "usebackq" %%j IN (`dir /AD /B "%%~1\%%~i\Extensions"`) do call :addrule %%j
 exit /B %ERRORLEVEL%
