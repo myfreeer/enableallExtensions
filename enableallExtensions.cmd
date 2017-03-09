@@ -18,7 +18,7 @@ title Add All Existing Chrome Extensions To ExtensionInstallWhitelist
 if exist rule.txt del rule.txt
 set /a n=0
 call :addbase
-FOR /F "usebackq" %%i IN (`dir /AD /B "User Data\Default\Extensions"`) DO call :addrule %%i
+FOR /F "usebackq" %i IN (`dir /AD /B "User Data"`) DO @if exist "User Data\%~i\Extensions" FOR /F "usebackq" %j IN (`dir /AD /B "User Data\%~i\Extensions"`) do call :addrule %%i
 if exist rule.txt LGPO.exe /t rule.txt
 ::if exist rule.txt move rule.txt nul
 if exist rule.txt del /f /q rule.txt
