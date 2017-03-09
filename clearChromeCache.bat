@@ -1,41 +1,48 @@
 @echo off
 set "_p=%~dp0"
 pushd "%~dp0"
-REM æ‰¹å¤„ç†ä¸­%~dp0ä¸ºæ‰¹å¤„ç†æ–‡ä»¶æ‰€åœ¨è·¯å¾„
-if not exist "%_p%\User Data" exit
+REM Åú´¦ÀíÖÐ%~dp0ÎªÅú´¦ÀíÎÄ¼þËùÔÚÂ·¾¶
+if exist debug.log del /f /q debug.log
+if exist "%~dp0\User Data" for /D %%i in ("%~dp0\User Data\*") do @if exist "%%~i\Preferences" call :clean "%~dp0" "%%~ni"
+if not ["%~dp0"] == ["%LOCALAPPDATA%\Google\Chrome\"] if exist "%LOCALAPPDATA%\Google\Chrome\User Data" for /D %%i in ("%LOCALAPPDATA%\Google\Chrome\User Data\*") do @if exist "%%~i\Preferences" call :clean "%~dp0" "%%~ni"
+if not defined LOCALAPPDATA if not ["%CD%"] == ["%USERPROFILE%\Local Settings\Application Data\Google\Chrome"] if exist "%USERPROFILE%\Local Settings\Application Data\Google\Chrome\User Data" for /D %%i in ("%USERPROFILE%\Local Settings\Application Data\Google\Chrome\User Data\*") do @if exist "%%~i\Preferences" call :clean "%~dp0" "%%~ni"
+timeout /t 60 2>nul || pause
+
+:clean
+if not exist "%~1\User Data" exit /B -1
+if not exist "%~1\User Data\%~2\Preferences" exit /B -2
 for %%i in (
-"%_p%\User Data\Default\Cache"
-"%_p%\User Data\PnaclTranslationCache"
-"%_p%\User Data\ShaderCache"
-"%_p%\User Data\Default\Application Cache"
-"%_p%\User Data\Default\JumpListIconsOld"
-"%_p%\User Data\Default\GPUCache"
-"%_p%\User Data\Default\Media Cache"
-"%_p%\User Data\Default\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache"
-"%_p%\User Data\Default\ChromeDWriteFontCache"
-"%_p%\User Data\Default\Current Session"
-"%_p%\User Data\Default\Current Tabs"
-"%_p%\User Data\Default\Service Worker\ScriptCache"
-"%_p%\User Data\Default\Service Worker\CacheStorage"
+"%~1\User Data\%~2\Cache"
+"%~1\User Data\PnaclTranslationCache"
+"%~1\User Data\ShaderCache"
+"%~1\User Data\%~2\Application Cache"
+"%~1\User Data\%~2\JumpListIconsOld"
+"%~1\User Data\%~2\GPUCache"
+"%~1\User Data\%~2\Media Cache"
+"%~1\User Data\%~2\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache"
+"%~1\User Data\%~2\ChromeDWriteFontCache"
+"%~1\User Data\%~2\Current Session"
+"%~1\User Data\%~2\Current Tabs"
+"%~1\User Data\%~2\Service Worker\ScriptCache"
+"%~1\User Data\%~2\Service Worker\CacheStorage"
 ) do (
 attrib -r -s -h %%i /D /S
 del %%i /f /s /q
 )
 
-del /f /s /q "%_p%User Data\Default\Local Storage\*wikipedia.org*"
-del /f /s /q "%_p%User Data\Default\Local Storage\*weibo.com*"
-del /f /s /q "%_p%User Data\Default\Local Storage\*twitter.com*"
-del /f /s /q "%_p%User Data\Default\Local Storage\*suning.com*"
-del /f /s /q "%_p%User Data\Default\Local Storage\*taobao.com*"
-del /f /s /q "%_p%User Data\Default\Local Storage\*wikisource.org*"
-del /f /s /q "%_p%User Data\Default\Local Storage\*tmall.com_*"
-del /f /s /q "%_p%User Data\Default\Local Storage\*itproportal.com_*"
-del /f /s /q "%_p%User Data\Default\Local Storage\*alipay.com_*"
-del /f /s /q "%_p%User Data\Default\Local Storage\*medium.com_*"
-del /f /s /q "%_p%User Data\Default\Local Storage\*.jaeapp.com_*"
-del /f /s /q "%_p%User Data\Default\Local Storage\*blog.tox.im_*"
-del /f /s /q "%_p%User Data\Default\Local Storage\*neihanshequ.com_*"
-del /f /s /q "%_p%User Data\Default\IndexedDB\*.bak"
-del /f /s /q "%_p%User Data\Default\IndexedDB\*.log"
-if exist debug.log del /f /q debug.log
-pause
+del /f /s /q "%~1\User Data\%~2\Local Storage\*wikipedia.org*"
+del /f /s /q "%~1\User Data\%~2\Local Storage\*weibo.com*"
+del /f /s /q "%~1\User Data\%~2\Local Storage\*twitter.com*"
+del /f /s /q "%~1\User Data\%~2\Local Storage\*suning.com*"
+del /f /s /q "%~1\User Data\%~2\Local Storage\*taobao.com*"
+del /f /s /q "%~1\User Data\%~2\Local Storage\*wikisource.org*"
+del /f /s /q "%~1\User Data\%~2\Local Storage\*tmall.com_*"
+del /f /s /q "%~1\User Data\%~2\Local Storage\*itproportal.com_*"
+del /f /s /q "%~1\User Data\%~2\Local Storage\*alipay.com_*"
+del /f /s /q "%~1\User Data\%~2\Local Storage\*medium.com_*"
+del /f /s /q "%~1\User Data\%~2\Local Storage\*.jaeapp.com_*"
+del /f /s /q "%~1\User Data\%~2\Local Storage\*blog.tox.im_*"
+del /f /s /q "%~1\User Data\%~2\Local Storage\*neihanshequ.com_*"
+del /f /s /q "%~1\User Data\%~2\IndexedDB\https_pan.baidu.com_0.indexeddb.leveldb\*.bak"
+del /f /s /q "%~1\User Data\%~2\IndexedDB\https_pan.baidu.com_0.indexeddb.leveldb\*.log"
+exit /B
