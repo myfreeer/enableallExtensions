@@ -20,7 +20,7 @@ set /a n=0
 call :addbase
 if exist "User Data" call :adduserdata "User Data"
 if not ["%CD%"] == ["%LOCALAPPDATA%\Google\Chrome"] if exist "%LOCALAPPDATA%\Google\Chrome\User Data" call :adduserdata "%LOCALAPPDATA%\Google\Chrome\User Data"
-if not ["%CD%"] == ["%LOCALAPPDATA%\Google\Chrome SxS"] if exist "%LOCALAPPDATA%\Google\Chrome SxS" call :adduserdata "%LOCALAPPDATA%\Google\Chrome SxS"
+if not ["%CD%"] == ["%LOCALAPPDATA%\Google\Chrome SxS"] if exist "%LOCALAPPDATA%\Google\Chrome SxS\User Data" call :adduserdata "%LOCALAPPDATA%\Google\Chrome SxS\User Data"
 if not defined LOCALAPPDATA if not ["%CD%"] == ["%USERPROFILE%\Local Settings\Application Data\Google\Chrome"] if exist "%USERPROFILE%\Local Settings\Application Data\Google\Chrome\User Data" call :adduserdata "%USERPROFILE%\Local Settings\Application Data\Google\Chrome\User Data"
 if exist rule.txt LGPO.exe /t rule.txt
 ::if exist rule.txt move rule.txt nul
