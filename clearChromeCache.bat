@@ -1,10 +1,10 @@
 @echo off
 set "_p=%~dp0"
 pushd "%~dp0"
-REM 批处理中%~dp0为批处理文件所在路径
 if exist debug.log del /f /q debug.log
 if exist "%~dp0\User Data" for /D %%i in ("%~dp0\User Data\*") do @if exist "%%~i\Preferences" call :clean "%~dp0" "%%~ni"
 if not ["%~dp0"] == ["%LOCALAPPDATA%\Google\Chrome\"] if exist "%LOCALAPPDATA%\Google\Chrome\User Data" for /D %%i in ("%LOCALAPPDATA%\Google\Chrome\User Data\*") do @if exist "%%~i\Preferences" call :clean "%~dp0" "%%~ni"
+if not ["%~dp0"] == ["%LOCALAPPDATA%\Google\Chrome SxS\"] if exist "%LOCALAPPDATA%\Google\Chrome SxS\User Data" for /D %%i in ("%LOCALAPPDATA%\Google\Chrome SxS\User Data\*") do @if exist "%%~i\Preferences" call :clean "%~dp0" "%%~ni"
 if not defined LOCALAPPDATA if not ["%CD%"] == ["%USERPROFILE%\Local Settings\Application Data\Google\Chrome"] if exist "%USERPROFILE%\Local Settings\Application Data\Google\Chrome\User Data" for /D %%i in ("%USERPROFILE%\Local Settings\Application Data\Google\Chrome\User Data\*") do @if exist "%%~i\Preferences" call :clean "%~dp0" "%%~ni"
 timeout /t 60 2>nul || pause
 
