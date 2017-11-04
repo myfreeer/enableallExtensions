@@ -10,7 +10,7 @@ param([string]$cwd='.', [string]$dll)
 
 function main {
     write-host -f white -b black `
-        "Chrome 'developer mode extensions' warning disabler 20170328"
+        "Chrome 'developer mode extensions' warning disabler 2017.09.29"
     $pathsDone = @{}
     if ($dll -and (gi -literal $dll)) {
         doPatch "DRAG'n'DROPPED" ((gi -literal $dll).directoryName + '\')
@@ -116,21 +116,28 @@ function doPatch([string]$pathLabel, [string]$path) {
     # old code: cmp eax,3; jge ...
     # new code: cmp eax,2; jg ... (jg can be 2-byte)
     function patch64 {
-        $pos = 0
-        $rx = [regex]"$rxChannel-.{1,100}-48-8D"
-        do {
-            $m = $rx.match($code,$pos)
-            if (!$m.success) { break }
-            $chanpos = $searchBase + $m.index/3 + 2
-            $pos = $m.index + $m.length + 1
-            $offs = $BC::ToUInt32($bytes, $searchBase + $pos/3+1)
-            $diff = $searchBase + $pos/3+5+$offs - $stroffs
-        } until ($diff -ge 0 -and $diff -le 4096 -and $diff % 256 -eq 0)
-        if (!$m.success) {
-            $rx = [regex]"84-C0.{18,48}($rxChannel)-.{30,60}84-C0"
-            $m = $rx.matches($code)
-            if ($m.count -ne 1) { return }
-            $chanpos = $searchBase + $m[0].groups[1].index/3 + 2
+        $patterns = "(?<channel>$rxChannel)-.{1,100}-(?<flag>48-8D-)",
+                    "(?<flag>48-8D-).{1250,1350}-(?<channel>$rxChannel)",
+                    "84-C0.{18,48}(?<channel>$rxChannel)-.{30,60}84-C0"
+        forEach ($pattern in $patterns) {
+            $pos = 0
+            $rx = [regex]$pattern
+            $patternDisplay = $pattern -replace '^(.{40}).+', '$1'
+            write-host -n -f darkgray "`tLooking for $patternDisplay"
+            do {
+                $m = $rx.match($code, $pos)
+                write-host -n -f darkgray .
+                if (!$m.success) { break }
+                $chanpos = $searchBase + $m.groups['channel'].index/3 + 2
+                if ($pattern -eq $patterns[-1]) {
+                    if ($rx.match($code, $pos + 1)) { return } else { break }
+                }
+                $pos = $m.groups['flag'].index + $m.groups['flag'].length
+                $offs = $BC::ToUInt32($bytes, $searchBase + $pos/3+1)
+                $diff = $searchBase + $pos/3+5+$offs - $stroffs
+            } until ($diff -ge 0 -and $diff -le 5120 -and $diff % 256 -eq 0)
+            write-host
+            if ($m.success) { break }
         }
         $chanpos
     }
